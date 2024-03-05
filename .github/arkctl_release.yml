@@ -68,7 +68,7 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         goversion: "1.21.3"
-        project_path: "./arkctl"
+        project_path: "./"
         binary_name: "arkctl"
         asset_name: "arkctl-${{ github.event.inputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}"
         release_tag: "arkctl-release-${{ github.event.inputs.version }}"
