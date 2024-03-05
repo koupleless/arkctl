@@ -5,14 +5,10 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'arkctl/**'
 
   pull_request:
     branches:
       - main
-    paths:
-      - 'arkctl/**'
 
   # enable manually running the workflow
   workflow_dispatch:
@@ -20,11 +16,6 @@ on:
 env:
   CGO_ENABLED: 0
   GOOS: linux
-  WORK_DIR: arkctl
-
-defaults:
-  run:
-    working-directory: arkctl
 
 jobs:
   unit-test:
