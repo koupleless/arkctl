@@ -25,3 +25,13 @@ func InfoPrefix(prefix string) *pterm.PrefixPrinter {
 		MessageStyle: pterm.Info.MessageStyle,
 	}
 }
+
+func ErrorPrefix(prefix string) *pterm.PrefixPrinter {
+	return &pterm.PrefixPrinter{
+		Prefix: pterm.Prefix{
+			Text:  prefix,
+			Style: pterm.Error.Prefix.Style,
+		},
+		MessageStyle: pterm.Error.MessageStyle,
+	}
+}

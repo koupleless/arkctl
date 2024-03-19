@@ -20,6 +20,7 @@ package deploy
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/koupleless/arkctl/common/osutil"
 	"os"
@@ -169,6 +170,10 @@ func execParseBizModel(ctx *contextutil.Context) bool {
 	}
 
 	bizModel, err := ark.ParseBizModel(ctx, fileutil.FileUrl(bundlePath))
+	if errors.Is(err, os.ErrNotExist) {
+		style.ErrorPrefix("File Not Exist").Println(defaultArg)
+		return false
+	}
 	if err != nil {
 		pterm.Error.PrintOnError(fmt.Errorf("failed to parse bundle: %s", err))
 		return false
