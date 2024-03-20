@@ -17,9 +17,11 @@ package ark
 import (
 	"archive/zip"
 	"context"
+	"errors"
 	"github.com/koupleless/arkctl/common/osutil"
 	"github.com/koupleless/arkctl/common/runtime"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/koupleless/arkctl/common/fileutil"
@@ -36,8 +38,11 @@ func parseJarBizModel(ctx context.Context, bizUrl fileutil.FileUrl) (model *BizM
 	defer runtime.RecoverFromError(&err)
 	fileUtil := fileutil.DefaultFileUtil()
 	localPath := runtime.MustReturnResult(fileUtil.Download(ctx, bizUrl))
-
-	zipReader := runtime.MustReturnResult(zip.OpenReader(localPath[len(osutil.GetLocalFileProtocol()):]))
+	readerJar, err := zip.OpenReader(localPath[len(osutil.GetLocalFileProtocol()):])
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, err
+	}
+	zipReader := runtime.MustReturnResult(readerJar, err)
 	defer zipReader.Close()
 
 	bizName := ""

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/koupleless/arkctl/common/osutil"
+	assert2 "github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"path/filepath"
@@ -30,6 +31,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/magiconair/properties/assert"
 )
+
+func TestParseBizModel_FileNotExist(t *testing.T) {
+	_, err := ParseBizModel(
+		context.Background(),
+		"file://ll.jar",
+	)
+	assert2.ErrorIs(t, err, os.ErrNotExist)
+}
 
 func TestParseBizModel_LocalJar(t *testing.T) {
 	// creating a mock jar file
