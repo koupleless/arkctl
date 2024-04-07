@@ -227,7 +227,7 @@ func TestUnInstallBiz_Failed(t *testing.T) {
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Equal(t, "uninstall biz failed: {{FAILED {FOO  0 []} uninstall biz failed!}}", err.Error())
+	assert.Equal(t, "uninstall biz failed: {{FAILED {FOO  0 []} uninstall biz failed! }}", err.Error())
 
 }
 
