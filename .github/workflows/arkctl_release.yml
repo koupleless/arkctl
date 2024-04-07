@@ -22,7 +22,7 @@ jobs:
     - name: Check if Tag Exists
       id: check_tag
       run: |
-          TAG_EXISTS=$(git ls-remote --tags origin arkctl-release-${{ github.event.inputs.version }})
+          TAG_EXISTS=$(git ls-remote --tags origin ${{ github.event.inputs.version }})
           if [ -z "$TAG_EXISTS" ]; then
             echo "exists=False" >> $GITHUB_OUTPUT
           else
@@ -42,7 +42,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ACTIONS_RUNNER_DEBUG: true
       with:
-        tag_name: arkctl-release-${{ github.event.inputs.version }}
+        tag_name: ${{ github.event.inputs.version }}
         release_name: Release arkctl ${{ github.event.inputs.version }} binary!
 
   release:
@@ -71,4 +71,4 @@ jobs:
         project_path: "./"
         binary_name: "arkctl"
         asset_name: "arkctl-${{ github.event.inputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}"
-        release_tag: "arkctl-release-${{ github.event.inputs.version }}"
+        release_tag: "${{ github.event.inputs.version }}"
