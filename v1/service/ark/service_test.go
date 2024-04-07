@@ -93,8 +93,9 @@ func TestInstallBiz_Failed(t *testing.T) {
 	port, cancel := mockHttpServer("/installBiz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"code":    "FAILED",
-			"message": "install biz failed!",
+			"code":            "FAILED",
+			"message":         "install biz failed!",
+			"errorStackTrace": "this is the error stack trace!",
 		})
 	})
 	defer func() {
@@ -113,7 +114,7 @@ func TestInstallBiz_Failed(t *testing.T) {
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Equal(t, "install biz failed: install biz failed!", err.Error())
+	assert.Equal(t, "install biz failed: install biz failed! \n Caused by: this is the error stack trace!", err.Error())
 }
 
 func TestInstallBiz_NoServer(t *testing.T) {
@@ -172,7 +173,7 @@ func TestUnInstallBiz_NotInstalled(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"code":    "FAILED",
-			"message": "uninstall biz success!",
+			"message": "uninstall biz failed!",
 			"data": map[string]interface{}{
 				"code": "NOT_FOUND_BIZ",
 			},
@@ -204,7 +205,7 @@ func TestUnInstallBiz_Failed(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"code":    "FAILED",
-			"message": "uninstall biz success!",
+			"message": "uninstall biz failed!",
 			"data": map[string]interface{}{
 				"code": "FOO",
 			},
@@ -226,7 +227,7 @@ func TestUnInstallBiz_Failed(t *testing.T) {
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Equal(t, "uninstall biz failed: {{FAILED {FOO  0 []} uninstall biz success!}}", err.Error())
+	assert.Equal(t, "uninstall biz failed: {{FAILED {FOO  0 []} uninstall biz failed! }}", err.Error())
 
 }
 

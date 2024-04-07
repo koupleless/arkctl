@@ -54,6 +54,9 @@ type ArkResponseBase struct {
 
 	// Message is the error message
 	Message string `json:"message"`
+
+	// ErrorStackTrace is the error stack trace
+	ErrorStackTrace string `json:"errorStackTrace"`
 }
 
 // ArkContainerRuntimeInfo contains necessary info of an ark container.
