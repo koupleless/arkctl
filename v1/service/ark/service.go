@@ -85,7 +85,7 @@ func (h *service) installBizOnLocal(ctx context.Context, req InstallBizRequest) 
 	}
 
 	if installResponse.Code != "SUCCESS" {
-		return fmt.Errorf("install biz failed: %s", installResponse.Message)
+		return fmt.Errorf("install biz failed: %s \n Caused by: %s", installResponse.Message, installResponse.ErrorStackTrace)
 	}
 
 	return nil

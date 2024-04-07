@@ -355,7 +355,6 @@ func execInstall(ctx *contextutil.Context) (result bool) {
 	}
 
 	return
-
 }
 
 // uninstall the given package in target ark container
