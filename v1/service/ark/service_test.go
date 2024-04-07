@@ -93,8 +93,9 @@ func TestInstallBiz_Failed(t *testing.T) {
 	port, cancel := mockHttpServer("/installBiz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"code":    "FAILED",
-			"message": "install biz failed!",
+			"code":            "FAILED",
+			"message":         "install biz failed!",
+			"errorStackTrace": "this is the error stack trace!",
 		})
 	})
 	defer func() {
@@ -113,7 +114,7 @@ func TestInstallBiz_Failed(t *testing.T) {
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Equal(t, "install biz failed: install biz failed!", err.Error())
+	assert.Equal(t, "install biz failed: install biz failed! \n Caused by: this is the error stack trace!", err.Error())
 }
 
 func TestInstallBiz_NoServer(t *testing.T) {
