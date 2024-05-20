@@ -112,6 +112,12 @@ func execUnInstallLocalWithPrompt(ctx *contextutil.Context) error {
 	p := &promptui.Select{
 		Label: "InstalledBiz",
 		Items: arkbizInfosStr,
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}:",
+			Active:   "\U000025B6 {{ . | blue }}",
+			Inactive: "  {{ . | white }}",
+			Selected: "\U000025B6 {{ . | red | blue }}",
+		},
 	}
 	idx, _, err := p.Run()
 	if err != nil {
