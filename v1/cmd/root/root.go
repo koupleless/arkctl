@@ -32,6 +32,10 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cobra.CheckErr(cmd.Help())
+			os.Exit(1)
+		}
 	},
 }
 
