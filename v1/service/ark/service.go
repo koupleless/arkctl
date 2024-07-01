@@ -177,7 +177,7 @@ func (h *service) QueryAllBiz(ctx context.Context, req QueryAllArkBizRequest) (r
 
 func (h *service) Health(ctx context.Context, req HealthRequest) (resp *HealthResponse, err error) {
 	logger := contextutil.GetLogger(ctx)
-	logger.WithField("req", string(runtime.MustReturnResult(json.Marshal(req)))).Info("health check started")
+	logger.WithField("req", string(runtime.MustReturnResult(json.Marshal(req)))).Info("query health started")
 	defer runtime.RecoverFromErrorWithHandler(func(recover error) {
 		err = recover
 		logger.Error(err)
@@ -189,10 +189,10 @@ func (h *service) Health(ctx context.Context, req HealthRequest) (resp *HealthRe
 		Post(fmt.Sprintf("http://%s:%d/health", req.HostName, req.Port)))
 	healthResponse := &HealthResponse{}
 
-	runtime.Assert(httpResp.IsSuccess(), "health check http failed with code %d", httpResp.StatusCode())
+	runtime.Assert(httpResp.IsSuccess(), "query health http failed with code %d", httpResp.StatusCode())
 	runtime.Must(json.Unmarshal(httpResp.Body(), healthResponse))
 	runtime.Must(IsSuccessResponse(&healthResponse.GenericArkResponseBase))
-	logger.Info("health check completed")
+	logger.Info("query health completed")
 
 	return healthResponse, nil
 }
