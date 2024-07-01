@@ -142,16 +142,85 @@ type QueryAllArkBizRequest struct {
 	Port int
 }
 
+// HealthRequest is the request for health status of base runtime.
+type HealthRequest struct {
+	// HostName is where the ark container is running
+	HostName string
+
+	// Port is where the ark container is serving
+	Port int
+}
+
+// ArkBizStateRecord is the response for biz module state record
+type ArkBizStateRecord struct {
+	ChangeTime string `json:"changeTime"`
+	State      string `json:"state"`
+}
+
 // ArkBizInfo is the response for querying all biz module in a given ark container.
 type ArkBizInfo struct {
-	BizName        string `json:"bizName"`
-	BizState       string `json:"bizState"`
-	BizVersion     string `json:"bizVersion"`
-	MainClass      string `json:"mainClass"`
-	WebContextPath string `json:"webContextPath"`
+	BizName         string              `json:"bizName"`
+	BizState        string              `json:"bizState"`
+	BizVersion      string              `json:"bizVersion"`
+	MainClass       string              `json:"mainClass"`
+	WebContextPath  string              `json:"webContextPath"`
+	BizStateRecords []ArkBizStateRecord `json:"bizStateRecords"`
 }
 
 // QueryAllArkBizResponse is the response for querying all biz module in a given ark container.
 type QueryAllArkBizResponse struct {
 	GenericArkResponseBase[[]ArkBizInfo]
+}
+
+type JvmInfo struct {
+	MaxNonHeapMemoryM       float64 `json:"max non heap memory(M)"`
+	JavaVersion             string  `json:"java version"`
+	MaxMemoryM              float64 `json:"max memory(M)"`
+	MaxHeapMemoryM          float64 `json:"max heap memory(M)"`
+	UsedHeapMemoryM         float64 `json:"used heap memory(M)"`
+	UsedNonHeapMemoryM      float64 `json:"used non heap memory(M)"`
+	LoadedClassCount        int     `json:"loaded class count"`
+	InitNonHeapMemoryM      float64 `json:"init non heap memory(M)"`
+	TotalMemoryM            float64 `json:"total memory(M)"`
+	FreeMemoryM             float64 `json:"free memory(M)"`
+	UnloadClassCount        int     `json:"unload class count"`
+	TotalClassCount         int     `json:"total class count"`
+	CommittedHeapMemoryM    float64 `json:"committed heap memory(M)"`
+	JavaHome                string  `json:"java home"`
+	InitHeapMemoryM         float64 `json:"init heap memory(M)"`
+	CommittedNonHeapMemoryM float64 `json:"committed non heap memory(M)"`
+	RunTimeS                float64 `json:"run time(s)"`
+}
+
+type CpuInfo struct {
+	Count      int     `json:"count"`
+	TotalUsed  float64 `json:"total used (%)"`
+	Type       string  `json:"type"`
+	UserUsed   float64 `json:"user used (%)"`
+	Free       float64 `json:"free (%)"`
+	SystemUsed float64 `json:"system used (%)"`
+}
+
+type MasterBizInfo struct {
+	BizName        string `json:"bizName"`
+	BizState       string `json:"bizState"`
+	BizVersion     string `json:"bizVersion"`
+	WebContextPath string `json:"webContextPath"`
+}
+
+// HealthData is the response data of querying health status of base runtime.
+type HealthData struct {
+	Jvm           JvmInfo       `json:"jvm"`
+	Cpu           CpuInfo       `json:"cpu"`
+	MasterBizInfo MasterBizInfo `json:"masterBizInfo"`
+}
+
+// HealthInfo is the response for querying health status of base runtime.
+type HealthInfo struct {
+	HealthData HealthData `json:"healthData"`
+}
+
+// HealthResponse is the response of health check of base runtime.
+type HealthResponse struct {
+	GenericArkResponseBase[HealthInfo]
 }

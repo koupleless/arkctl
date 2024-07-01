@@ -40,6 +40,9 @@ type Service interface {
 
 	// QueryAllBiz call the remote ark container to query biz.
 	QueryAllBiz(ctx context.Context, req QueryAllArkBizRequest) (*QueryAllArkBizResponse, error)
+
+	// Health call the remote ark container to query runtime health.
+	Health(ctx context.Context, req HealthRequest) (*HealthResponse, error)
 }
 
 // BuildService return a new Service.
@@ -170,6 +173,28 @@ func (h *service) QueryAllBiz(ctx context.Context, req QueryAllArkBizRequest) (r
 	logger.Info("query all biz completed")
 
 	return queryAllBizResponse, nil
+}
+
+func (h *service) Health(ctx context.Context, req HealthRequest) (resp *HealthResponse, err error) {
+	logger := contextutil.GetLogger(ctx)
+	logger.WithField("req", string(runtime.MustReturnResult(json.Marshal(req)))).Info("health check started")
+	defer runtime.RecoverFromErrorWithHandler(func(recover error) {
+		err = recover
+		logger.Error(err)
+	})()
+
+	httpResp := runtime.MustReturnResult(h.client.R().
+		SetContext(context.Background()).
+		SetBody(nil).
+		Post(fmt.Sprintf("http://%s:%d/health", req.HostName, req.Port)))
+	healthResponse := &HealthResponse{}
+
+	runtime.Assert(httpResp.IsSuccess(), "health check http failed with code %d", httpResp.StatusCode())
+	runtime.Must(json.Unmarshal(httpResp.Body(), healthResponse))
+	runtime.Must(IsSuccessResponse(&healthResponse.GenericArkResponseBase))
+	logger.Info("health check completed")
+
+	return healthResponse, nil
 }
 
 // IsSuccessResponse checks if the response is successful
