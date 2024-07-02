@@ -266,6 +266,12 @@ func TestQueryAllBiz_HappyPath(t *testing.T) {
 					"bizVersion":     "0.0.1-SNAPSHOT",
 					"mainClass":      "com.alipay.sofa.web.biz1.Biz1Application",
 					"webContextPath": "biz1",
+					"bizStateRecords": []map[string]interface{}{
+						{
+							"changeTime": "2024-07-01 12:00:00.000",
+							"state":      "ACTIVATED",
+						},
+					},
 				},
 			},
 		})
@@ -291,6 +297,12 @@ func TestQueryAllBiz_HappyPath(t *testing.T) {
 					BizVersion:     "0.0.1-SNAPSHOT",
 					MainClass:      "com.alipay.sofa.web.biz1.Biz1Application",
 					WebContextPath: "biz1",
+					BizStateRecords: []ArkBizStateRecord{
+						{
+							ChangeTime: "2024-07-01 12:00:00.000",
+							State:      "ACTIVATED",
+						},
+					},
 				},
 			},
 		},
@@ -310,4 +322,104 @@ func TestIsSuccessResponse(t *testing.T) {
 
 func TestUnImplemented(t *testing.T) {
 
+}
+
+func TestHealth_HappyPath(t *testing.T) {
+	ctx := context.Background()
+	client := BuildService(ctx)
+	port, cancel := mockHttpServer("/health", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"code": "SUCCESS",
+			"data": map[string]interface{}{
+				"healthData": map[string]interface{}{
+					"cpu": map[string]interface{}{
+						"count":           12,
+						"free (%)":        82.90837318159039,
+						"system used (%)": 6.207871242418149,
+						"total used (%)":  139957397,
+						"type":            "Apple M3 Pro",
+						"user used (%)":   10.883755575991456,
+					},
+					"jvm": map[string]interface{}{
+						"committed heap memory(M)":     286.5,
+						"committed non heap memory(M)": 140.3359375,
+						"free memory(M)":               78.14934539794922,
+						"init heap memory(M)":          288,
+						"init non heap memory(M)":      2.4375,
+						"java home":                    "/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre",
+						"java version":                 "1.8.0_291",
+						"loaded class count":           13155,
+						"max heap memory(M)":           4096,
+						"max memory(M)":                4096,
+						"max non heap memory(M)":       -9.5367431640625e-7,
+						"run time(s)":                  497862.907,
+						"total class count":            13224,
+						"total memory(M)":              286.5,
+						"unload class count":           69,
+						"used heap memory(M)":          208.35065460205078,
+						"used non heap memory(M)":      129.16268920898438,
+					},
+					"masterBizInfo": map[string]interface{}{
+						"bizName":        "base",
+						"bizState":       "ACTIVATED",
+						"bizVersion":     "1.0.0",
+						"webContextPath": "/",
+					},
+				},
+			},
+		})
+	})
+
+	defer func() {
+		cancel()
+	}()
+
+	info, err := client.Health(ctx, HealthRequest{
+		HostName: "127.0.0.1",
+		Port:     port,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &HealthResponse{
+		GenericArkResponseBase: GenericArkResponseBase[HealthInfo]{
+			Code: "SUCCESS",
+			Data: HealthInfo{
+				HealthData{
+					Cpu: CpuInfo{
+						Count:      12,
+						Free:       82.90837318159039,
+						SystemUsed: 6.207871242418149,
+						TotalUsed:  139957397,
+						Type:       "Apple M3 Pro",
+						UserUsed:   10.883755575991456,
+					},
+					Jvm: JvmInfo{
+						CommittedHeapMemoryM:    286.5,
+						CommittedNonHeapMemoryM: 140.3359375,
+						FreeMemoryM:             78.14934539794922,
+						InitHeapMemoryM:         288,
+						InitNonHeapMemoryM:      2.4375,
+						JavaHome:                "/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre",
+						JavaVersion:             "1.8.0_291",
+						LoadedClassCount:        13155,
+						MaxHeapMemoryM:          4096,
+						MaxMemoryM:              4096,
+						MaxNonHeapMemoryM:       -9.5367431640625e-7,
+						RunTimeS:                497862.907,
+						TotalClassCount:         13224,
+						TotalMemoryM:            286.5,
+						UnloadClassCount:        69,
+						UsedHeapMemoryM:         208.35065460205078,
+						UsedNonHeapMemoryM:      129.16268920898438,
+					},
+					MasterBizInfo: MasterBizInfo{
+						BizName:        "base",
+						BizState:       "ACTIVATED",
+						BizVersion:     "1.0.0",
+						WebContextPath: "/",
+					},
+				},
+			},
+		},
+	}, info)
 }
