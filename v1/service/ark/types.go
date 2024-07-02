@@ -155,6 +155,8 @@ type HealthRequest struct {
 type ArkBizStateRecord struct {
 	ChangeTime string `json:"changeTime"`
 	State      string `json:"state"`
+	Reason     string `json:"reason"`
+	Message    string `json:"message"`
 }
 
 // ArkBizInfo is the response for querying all biz module in a given ark container.
@@ -190,6 +192,9 @@ type JvmInfo struct {
 	InitHeapMemoryM         float64 `json:"init heap memory(M)"`
 	CommittedNonHeapMemoryM float64 `json:"committed non heap memory(M)"`
 	RunTimeS                float64 `json:"run time(s)"`
+	JavaUsedMetaspace       int64   `json:"java used metaspace"`
+	JavaCommittedMetaspace  int64   `json:"java committed metaspace"`
+	JavaMaxMetaspace        int64   `json:"java max metaspace"`
 }
 
 type CpuInfo struct {
