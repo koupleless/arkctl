@@ -22,7 +22,6 @@ import (
 	"github.com/koupleless/arkctl/common/contextutil"
 	"os"
 
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,12 +30,8 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cobra.CheckErr(cmd.Help())
-			os.Exit(1)
-		}
-	},
+	Use: "arkctl",
+	Run: runHelp,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -48,9 +43,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	contextutil.DisableLogger()
-	style := pterm.NewStyle(pterm.Italic, pterm.Bold, pterm.FgLightBlue)
-	pterm.DefaultBasicText.
-		Println("Welcome to use " + style.Sprint("ARKCTL") + " to ease your develop experience!")
+	//style := pterm.NewStyle(pterm.Italic, pterm.Bold, pterm.FgLightBlue)
+	//pterm.DefaultBasicText.
+	//	Println("Welcome to use " + style.Sprint("ARKCTL") + " to ease your develop experience!")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -73,4 +68,8 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func runHelp(cmd *cobra.Command, args []string) {
+	cmd.Help()
 }
