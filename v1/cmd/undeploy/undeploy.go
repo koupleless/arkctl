@@ -106,7 +106,7 @@ func execUnInstallLocalWithPrompt(ctx *contextutil.Context) error {
 	arkbizInfos := response.Data
 	arkbizInfosStr := make([]string, 0, len(arkbizInfos))
 	for _, biz := range arkbizInfos {
-		arkbizInfosStr = append(arkbizInfosStr, biz.BizName+":"+biz.BizVersion+"|"+biz.BizState)
+		arkbizInfosStr = append(arkbizInfosStr, biz.BizName+":"+biz.BizVersion+"|"+fmt.Sprint(biz.BizState))
 	}
 
 	p := &promptui.Select{

@@ -162,7 +162,7 @@ type ArkBizStateRecord struct {
 // ArkBizInfo is the response for querying all biz module in a given ark container.
 type ArkBizInfo struct {
 	BizName         string              `json:"bizName"`
-	BizState        string              `json:"bizState"`
+	BizState        int                 `json:"bizState"`
 	BizVersion      string              `json:"bizVersion"`
 	MainClass       string              `json:"mainClass"`
 	WebContextPath  string              `json:"webContextPath"`
