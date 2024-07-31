@@ -26,7 +26,7 @@ const (
 
 // ArkResponseData is the response data of ark api.
 type ArkResponseData struct {
-	Code         string        `json:"code"`
+	Code         int           `json:"code"`
 	Message      string        `json:"message"`
 	ElapsedSpace int           `json:"elapsedSpace"`
 	BizInfos     []interface{} `json:"bizInfos"`
@@ -35,7 +35,7 @@ type ArkResponseData struct {
 // GenericArkResponseBase is the base response of ark api.
 type GenericArkResponseBase[T any] struct {
 	// Code is the response code
-	Code string `json:"code"`
+	Code int `json:"code"`
 
 	// Data is the response data
 	Data T `json:"data"`
@@ -47,7 +47,7 @@ type GenericArkResponseBase[T any] struct {
 // ArkResponseBase is the base response of ark api.
 type ArkResponseBase struct {
 	// Code is the response code
-	Code string `json:"code"`
+	Code int `json:"code"`
 
 	// Data is the response data
 	Data ArkResponseData `json:"data"`

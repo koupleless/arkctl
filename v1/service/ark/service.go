@@ -87,7 +87,7 @@ func (h *service) installBizOnLocal(ctx context.Context, req InstallBizRequest) 
 		return err
 	}
 
-	if installResponse.Code != "SUCCESS" {
+	if installResponse.Code != 0 {
 		return fmt.Errorf("install biz failed: %s \n Caused by: %s", installResponse.Message, installResponse.ErrorStackTrace)
 	}
 
@@ -127,8 +127,8 @@ func (h *service) unInstallBizOnLocal(_ context.Context, req UnInstallBizRequest
 	uninstallResponse := &UnInstallBizResponse{}
 	runtime.Must(json.Unmarshal(resp.Body(), uninstallResponse))
 
-	isBizNotFound := uninstallResponse.Code == "FAILED" && uninstallResponse.Data.Code == "NOT_FOUND_BIZ"
-	isInstallSuccess := uninstallResponse.Code == "SUCCESS"
+	isBizNotFound := uninstallResponse.Code == 1 && uninstallResponse.Data.Code == 3
+	isInstallSuccess := uninstallResponse.Code == 0
 	runtime.Assert(isBizNotFound || isInstallSuccess, "uninstall biz failed: %v", *uninstallResponse)
 	return
 }
@@ -199,7 +199,7 @@ func (h *service) Health(ctx context.Context, req HealthRequest) (resp *HealthRe
 
 // IsSuccessResponse checks if the response is successful
 func IsSuccessResponse[T any](resp *GenericArkResponseBase[T]) error {
-	if resp.Code == "SUCCESS" {
+	if resp.Code == 0 {
 		return nil
 	}
 	return fmt.Errorf("sofa-ark failed response: %s", resp.Message)
