@@ -2,16 +2,26 @@ package create
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+
 	"github.com/koupleless/arkctl/v1/cmd/root"
 	"github.com/spf13/cobra"
-	"os/exec"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
-// createCmd represents the create command
+//go:embed koupleless-ext-module-auto-convertor-0.0.1-SNAPSHOT.jar
+var jarFile []byte
+
 var createCmd = &cobra.Command{
 	Use:   "create [flags]",
-	Short: "Convert to module auto-configuration",
+	Short: "转换为模块自动配置",
 	Long: `create 命令用于自动模块化。
 它会执行以下操作:
 1. 修改 application.properties 文件
@@ -27,70 +37,109 @@ var createCmd = &cobra.Command{
 		projectPath, _ := cmd.Flags().GetString("projectPath")
 		applicationName, _ := cmd.Flags().GetString("applicationName")
 
-		jarPath := "D:\\koupleless-ext-appModuleAutomator\\target\\demo-0.0.1-SNAPSHOT.jar"
-		runJavaProgram(jarPath, projectPath, applicationName)
+		if err := runJavaProgram(projectPath, applicationName); err != nil {
+			log.Fatalf("执行 create 命令失败: %v", err)
+		}
 	},
 }
 
-// runJavaProgram 运行 Java 程序
-func runJavaProgram(jarPath, projectPath, applicationName string) {
-	// 创建一个命令来运行 Java 程序
-	javaCmd := exec.Command("java", "-jar", jarPath)
-
-	// 创建一个管道，用于传递输入到 Java 程序
-	stdinPipe, err := javaCmd.StdinPipe()
+func runJavaProgram(projectPath, applicationName string) error {
+	tempDir, err := createTempJarFile()
 	if err != nil {
-		fmt.Printf("创建标准输入管道失败: %s\n", err)
-		return
+		return fmt.Errorf("创建临时 JAR 文件失败: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	jarPath := filepath.Join(tempDir, "converter.jar")
+	cmd := prepareJavaCommand(jarPath, projectPath)
+
+	if err := executeJavaCommand(cmd, projectPath, applicationName); err != nil {
+		return fmt.Errorf("执行 Java 命令失败: %w", err)
 	}
 
-	// 将标准输出和标准错误重定向到缓冲区
+	return nil
+}
+
+func createTempJarFile() (string, error) {
+	tempDir, err := os.MkdirTemp("", "arkctl-jar")
+	if err != nil {
+		return "", fmt.Errorf("创建临时目录失败: %w", err)
+	}
+
+	jarPath := filepath.Join(tempDir, "converter.jar")
+	if err := os.WriteFile(jarPath, jarFile, 0644); err != nil {
+		os.RemoveAll(tempDir)
+		return "", fmt.Errorf("写入 jar 文件失败: %w", err)
+	}
+
+	return tempDir, nil
+}
+
+func prepareJavaCommand(jarPath, projectPath string) *exec.Cmd {
+	cmd := exec.Command("java", "-Dfile.encoding=UTF-8", "-jar", jarPath)
+	cmd.Dir = projectPath
+	return cmd
+}
+
+func executeJavaCommand(cmd *exec.Cmd, projectPath, applicationName string) error {
+	stdinPipe, err := cmd.StdinPipe()
+	if err != nil {
+		return fmt.Errorf("创建标准输入管道失败: %w", err)
+	}
+
 	var outBuffer bytes.Buffer
-	javaCmd.Stdout = &outBuffer
-	javaCmd.Stderr = &outBuffer
+	cmd.Stdout = &outBuffer
+	cmd.Stderr = &outBuffer
 
-	// 启动 Java 程序
-	if err := javaCmd.Start(); err != nil {
-		fmt.Printf("启动 Java 程序出错: %s\n", err)
-		return
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("启动 Java 程序出错: %w", err)
 	}
 
-	// 写入项目路径到 Java 程序的标准输入
-	if _, err := stdinPipe.Write([]byte(projectPath + "\n")); err != nil {
-		fmt.Printf("写入项目路径出错: %s\n", err)
-		return
+	if err := writeInputToJavaProgram(stdinPipe, projectPath, applicationName); err != nil {
+		return err
 	}
 
-	// 写入应用名称到 Java 程序的标准输入
-	if _, err := stdinPipe.Write([]byte(applicationName + "\n")); err != nil {
-		fmt.Printf("写入应用名称出错: %s\n", err)
-		return
+	if err := cmd.Wait(); err != nil {
+		printGBKString(outBuffer.Bytes())
+		return fmt.Errorf("Java 程序运行出错: %w", err)
 	}
 
-	// 关闭标准输入管道
+	printGBKString(outBuffer.Bytes())
+	return nil
+}
+
+func writeInputToJavaProgram(stdinPipe io.WriteCloser, projectPath, applicationName string) error {
+	if _, err := io.WriteString(stdinPipe, projectPath+"\n"); err != nil {
+		return fmt.Errorf("写入项目路径出错: %w", err)
+	}
+
+	if _, err := io.WriteString(stdinPipe, applicationName+"\n"); err != nil {
+		return fmt.Errorf("写入应用名称出错: %w", err)
+	}
+
 	if err := stdinPipe.Close(); err != nil {
-		fmt.Printf("关闭标准输入管道出错: %s\n", err)
-		return
+		return fmt.Errorf("关闭标准输入管道出错: %w", err)
 	}
 
-	// 等待 Java 程序执行完成
-	if err := javaCmd.Wait(); err != nil {
-		fmt.Printf("Java 程序运行出错: %s\n", err)
-		fmt.Printf("错误输出: %s\n", outBuffer.String())
+	return nil
+}
+
+func printGBKString(gbkBytes []byte) {
+	utf8Reader := transform.NewReader(bytes.NewReader(gbkBytes), simplifiedchinese.GBK.NewDecoder())
+	utf8Bytes, err := io.ReadAll(utf8Reader)
+	if err != nil {
+		log.Printf("转换编码出错: %v", err)
 		return
 	}
-
-	fmt.Printf("Java 程序输出:\n%s\n", outBuffer.String())
+	fmt.Printf("Java 程序输出:\n%s\n", string(utf8Bytes))
 }
 
 func init() {
 	root.RootCmd.AddCommand(createCmd)
 
-	// 定义命令行参数
 	createCmd.Flags().StringP("projectPath", "p", "", "项目路径 (必填)")
 	createCmd.Flags().StringP("applicationName", "a", "", "应用名称 (必填)")
 
-	// 标记必填参数
 	createCmd.MarkFlagRequired("projectPath")
 	createCmd.MarkFlagRequired("applicationName")
 }
