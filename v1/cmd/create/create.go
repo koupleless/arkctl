@@ -38,7 +38,8 @@ var createCmd = &cobra.Command{
 		applicationName, _ := cmd.Flags().GetString("applicationName")
 
 		if err := runJavaProgram(projectPath, applicationName); err != nil {
-			log.Fatalf("执行 create 命令失败: %v", err)
+			fmt.Fprintf(os.Stderr, "执行 create 命令失败: %v\n", err)
+			os.Exit(1)
 		}
 	},
 }
