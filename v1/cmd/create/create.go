@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,11 +12,16 @@ import (
 	"github.com/koupleless/arkctl/v1/cmd/root"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 )
 
 //go:embed koupleless-ext-module-auto-convertor-0.0.1-SNAPSHOT.jar
 var jarFile []byte
+
+type CreateConfig struct {
+	ProjectPath     string
+	ApplicationName string
+	JarPath         string
+}
 
 var createCmd = &cobra.Command{
 	Use:   "create [flags]",
@@ -34,8 +38,17 @@ var createCmd = &cobra.Command{
 示例:
   arkctl create -p /path/to/project -a myapp`,
 	Run: func(cmd *cobra.Command, args []string) {
-		projectPath, _ := cmd.Flags().GetString("projectPath")
-		applicationName, _ := cmd.Flags().GetString("applicationName")
+		projectPath, err := cmd.Flags().GetString("projectPath")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "获取项目路径失败: %v\n", err)
+			os.Exit(1)
+		}
+
+		applicationName, err := cmd.Flags().GetString("applicationName")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "获取应用名称失败: %v\n", err)
+			os.Exit(1)
+		}
 
 		if err := runJavaProgram(projectPath, applicationName); err != nil {
 			fmt.Fprintf(os.Stderr, "执行 create 命令失败: %v\n", err)
@@ -70,14 +83,14 @@ func createTempJarFile() (string, error) {
 	jarPath := filepath.Join(tempDir, "converter.jar")
 	if err := os.WriteFile(jarPath, jarFile, 0644); err != nil {
 		os.RemoveAll(tempDir)
-		return "", fmt.Errorf("写入 jar 文件失败: %w", err)
+		return "", fmt.Errorf("入 jar 文件失败: %w", err)
 	}
 
 	return tempDir, nil
 }
 
 func prepareJavaCommand(jarPath, projectPath string) *exec.Cmd {
-	cmd := exec.Command("java", "-Dfile.encoding=UTF-8", "-jar", jarPath)
+	cmd := exec.Command("java", "-jar", jarPath)
 	cmd.Dir = projectPath
 	return cmd
 }
@@ -101,12 +114,25 @@ func executeJavaCommand(cmd *exec.Cmd, projectPath, applicationName string) erro
 	}
 
 	if err := cmd.Wait(); err != nil {
-		printGBKString(outBuffer.Bytes())
+		if output, convErr := convertGBKToUTF8(outBuffer.Bytes()); convErr == nil {
+			fmt.Print(output)
+		}
 		return fmt.Errorf("Java 程序运行出错: %w", err)
 	}
 
-	printGBKString(outBuffer.Bytes())
+	if output, err := convertGBKToUTF8(outBuffer.Bytes()); err == nil {
+		fmt.Print(output)
+	}
 	return nil
+}
+
+func convertGBKToUTF8(gbkBytes []byte) (string, error) {
+	decoder := simplifiedchinese.GBK.NewDecoder()
+	utf8Bytes, err := decoder.Bytes(gbkBytes)
+	if err != nil {
+		return "", fmt.Errorf("转换编码出错: %w", err)
+	}
+	return string(utf8Bytes), nil
 }
 
 func writeInputToJavaProgram(stdinPipe io.WriteCloser, projectPath, applicationName string) error {
@@ -123,16 +149,6 @@ func writeInputToJavaProgram(stdinPipe io.WriteCloser, projectPath, applicationN
 	}
 
 	return nil
-}
-
-func printGBKString(gbkBytes []byte) {
-	utf8Reader := transform.NewReader(bytes.NewReader(gbkBytes), simplifiedchinese.GBK.NewDecoder())
-	utf8Bytes, err := io.ReadAll(utf8Reader)
-	if err != nil {
-		log.Printf("转换编码出错: %v", err)
-		return
-	}
-	fmt.Printf("Java 程序输出:\n%s\n", string(utf8Bytes))
 }
 
 func init() {
