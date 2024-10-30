@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	_ "github.com/koupleless/arkctl/v1/cmd/create"
 	_ "github.com/koupleless/arkctl/v1/cmd/deploy"
 	_ "github.com/koupleless/arkctl/v1/cmd/gen"
 	_ "github.com/koupleless/arkctl/v1/cmd/root"
