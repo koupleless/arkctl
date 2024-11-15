@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/koupleless/arkctl/common/osutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +29,7 @@ import (
 	"github.com/koupleless/arkctl/common/cmdutil"
 	"github.com/koupleless/arkctl/common/contextutil"
 	"github.com/koupleless/arkctl/common/fileutil"
+	"github.com/koupleless/arkctl/common/osutil"
 	"github.com/koupleless/arkctl/common/runtime"
 	"github.com/koupleless/arkctl/common/style"
 	"github.com/koupleless/arkctl/v1/cmd/root"
@@ -122,22 +122,27 @@ func execMavenBuild(ctx *contextutil.Context) bool {
 
 	if err := mvn.Exec(); err != nil {
 		pterm.Error.PrintOnErrorf("Build bundle failed: %s!", err)
+		printSuggestion(err)
 		return false
 	}
 
+	mvnOutput := []string{}
 	go func() {
 		for line := range mvn.Output() {
 			pterm.Println(line)
+			mvnOutput = append(mvnOutput, line)
 		}
 	}()
 
 	if err := <-mvn.Wait(); err != nil {
 		pterm.Error.PrintOnErrorf("Build bundle failed: %s!", err)
+		printSuggestion(err)
 		return false
 	}
 
 	if err := mvn.GetExitError(); err != nil {
 		pterm.Error.PrintOnErrorf("Build bundle failed: %s!", err)
+		printSuggestionWithMore(err, mvnOutput)
 		return false
 	}
 
