@@ -374,6 +374,7 @@ func execUnInstallLocal(ctx *contextutil.Context) bool {
 		TargetContainer: *arkContainerRuntimeInfo,
 	}); err != nil {
 		pterm.Error.PrintOnError(err)
+		printSuggestion(err)
 		return false
 	}
 
@@ -393,6 +394,7 @@ func execInstallLocal(ctx *contextutil.Context) bool {
 		TargetContainer: *arkContainerRuntimeInfo,
 	}); err != nil {
 		pterm.Error.PrintOnError(err)
+		printSuggestion(err)
 		return false
 	}
 	return true
