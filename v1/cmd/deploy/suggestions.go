@@ -32,6 +32,7 @@ var suggestionFuncs = []func(errorOutputLines []string) bool{
 	suggestionMavenExecutableNotFound,
 	suggestionMavenVersionTooLow,
 	suggestWebContextPathConflict,
+	suggestApplicationProperties,
 }
 
 func printSuggestion(err error) {
@@ -131,6 +132,16 @@ func suggestWebContextPathConflict(errorOutputLines []string) bool {
 		doPrintSuggestion("another installed biz module has the same webContextPath as yours")
 		doPrintSuggestion("change your <webContextPath> in pom.xml or uninstall another biz module")
 		return true
+	}
+	return false
+}
+
+func suggestApplicationProperties(errorOutputLines []string) bool {
+	for _, line := range errorOutputLines {
+		if strings.Contains(line, "spring.application.name must be configured") {
+			doPrintSuggestion("add \"spring.application.name\" config into your application.properties")
+			return true
+		}
 	}
 	return false
 }
