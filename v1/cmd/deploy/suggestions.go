@@ -34,6 +34,7 @@ var suggestionFuncs = []func(errorOutputLines []string) bool{
 	suggestWebContextPathConflict,
 	suggestApplicationProperties,
 	suggestImportSpringBootAutoConfiguration,
+	suggestJvmInitializingFailed,
 }
 
 func printSuggestion(err error) {
@@ -152,6 +153,16 @@ func suggestImportSpringBootAutoConfiguration(errorOutputLines []string) bool {
 		if strings.Contains(line, "The following classes could not be excluded because they are not auto-configuration classes") &&
 			strings.Contains(line, "org.springframework.boot.actuate.autoconfigure.startup.StartupEndpointAutoConfiguration") {
 			doPrintSuggestion("import sprign-boot-actuator-autoconfiguration artifact in your pom.xml file")
+			return true
+		}
+	}
+	return false
+}
+
+func suggestJvmInitializingFailed(errorOutputLines []string) bool {
+	for _, line := range errorOutputLines {
+		if strings.Contains(line, "Error occurred during initialization of VM") {
+			doPrintSuggestion("check your jvm staring paramaters")
 			return true
 		}
 	}
