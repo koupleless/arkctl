@@ -33,6 +33,7 @@ var suggestionFuncs = []func(errorOutputLines []string) bool{
 	suggestionMavenVersionTooLow,
 	suggestWebContextPathConflict,
 	suggestApplicationProperties,
+	suggestImportSpringBootAutoConfiguration,
 }
 
 func printSuggestion(err error) {
@@ -140,6 +141,17 @@ func suggestApplicationProperties(errorOutputLines []string) bool {
 	for _, line := range errorOutputLines {
 		if strings.Contains(line, "spring.application.name must be configured") {
 			doPrintSuggestion("add \"spring.application.name\" config into your application.properties")
+			return true
+		}
+	}
+	return false
+}
+
+func suggestImportSpringBootAutoConfiguration(errorOutputLines []string) bool {
+	for _, line := range errorOutputLines {
+		if strings.Contains(line, "The following classes could not be excluded because they are not auto-configuration classes") &&
+			strings.Contains(line, "org.springframework.boot.actuate.autoconfigure.startup.StartupEndpointAutoConfiguration") {
+			doPrintSuggestion("import sprign-boot-actuator-autoconfiguration artifact in your pom.xml file")
 			return true
 		}
 	}
