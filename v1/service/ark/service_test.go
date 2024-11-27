@@ -268,7 +268,7 @@ func TestQueryAllBiz_HappyPath(t *testing.T) {
 					"webContextPath": "biz1",
 					"bizStateRecords": []map[string]interface{}{
 						{
-							"changeTime": "2024-07-01 12:00:00.000",
+							"changeTime": 12345,
 							"state":      "ACTIVATED",
 						},
 					},
@@ -299,7 +299,7 @@ func TestQueryAllBiz_HappyPath(t *testing.T) {
 					WebContextPath: "biz1",
 					BizStateRecords: []ArkBizStateRecord{
 						{
-							ChangeTime: "2024-07-01 12:00:00.000",
+							ChangeTime: 12345,
 							State:      "ACTIVATED",
 						},
 					},
