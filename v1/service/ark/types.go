@@ -153,7 +153,7 @@ type HealthRequest struct {
 
 // ArkBizStateRecord is the response for biz module state record
 type ArkBizStateRecord struct {
-	ChangeTime string `json:"changeTime"`
+	ChangeTime int64  `json:"changeTime"`
 	State      string `json:"state"`
 	Reason     string `json:"reason"`
 	Message    string `json:"message"`
