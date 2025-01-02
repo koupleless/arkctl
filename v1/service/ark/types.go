@@ -14,7 +14,9 @@
 
 package ark
 
-import "github.com/koupleless/arkctl/common/fileutil"
+import (
+	"github.com/koupleless/arkctl/common/fileutil"
+)
 
 type ArkContainerRunType string
 
@@ -24,12 +26,24 @@ const (
 	ArkContainerRunTypeK8s   ArkContainerRunType = "pod"
 )
 
+// ArkClientResponse is the client response of ark api
+type ArkClientResponse struct {
+	Code     string    `json:"code"`
+	Message  string    `json:"message"`
+	BizInfos []BizInfo `json:"bizInfos"`
+}
+
 // ArkResponseData is the response data of ark api.
 type ArkResponseData struct {
-	Code         string        `json:"code"`
-	Message      string        `json:"message"`
-	ElapsedSpace int           `json:"elapsedSpace"`
-	BizInfos     []interface{} `json:"bizInfos"`
+	ArkClientResponse
+	ElapsedSpace int `json:"elapsedSpace"`
+}
+
+type ArkBatchInstallResponse struct {
+	Code             string                       `json:"code"`
+	Message          string                       `json:"message"`
+	ElapsedSpace     int                          `json:"elapsedSpace"`
+	BizUrlToResponse map[string]ArkClientResponse `json:"bizUrlToResponse"`
 }
 
 // GenericArkResponseBase is the base response of ark api.
@@ -93,6 +107,33 @@ type BizModel struct {
 
 	// BizUrl is the location of source code.
 	BizUrl fileutil.FileUrl `json:"bizUrl,omitempty"`
+}
+
+type BizInfo struct {
+	BizName                       string            `json:"bizName"`
+	BizVersion                    string            `json:"bizVersion"`
+	BizState                      string            `json:"bizState"`
+	MainClass                     string            `json:"mainClass"`
+	WebContextPath                string            `json:"webContextPath"`
+	URLs                          []interface{}     `json:"urls"`
+	BizURL                        interface{}       `json:"bizUrl"`
+	PluginURLs                    []interface{}     `json:"pluginUrls"`
+	ClassLoader                   interface{}       `json:"classLoader"`
+	Attributes                    map[string]string `json:"attributes"`
+	Priority                      int               `json:"priority"`
+	DenyImportPackages            []string          `json:"denyImportPackages"`
+	DenyImportPackageNodes        []string          `json:"denyImportPackageNodes"`
+	DenyImportPackageStems        []string          `json:"denyImportPackageStems"`
+	DenyImportClasses             []string          `json:"denyImportClasses"`
+	DenyImportResources           []string          `json:"denyImportResources"`
+	InjectPluginDependencies      []string          `json:"injectPluginDependencies"`
+	InjectExportPackages          []string          `json:"injectExportPackages"`
+	DeclaredLibraries             []string          `json:"declaredLibraries"`
+	DeclaredCacheMap              map[string]bool   `json:"declaredCacheMap"`
+	DenyPrefixImportResourceStems []string          `json:"denyPrefixImportResourceStems"`
+	DenySuffixImportResourceStems []string          `json:"denySuffixImportResourceStems"`
+	BizTempWorkDir                interface{}       `json:"bizTempWorkDir"`
+	BizStateRecords               []interface{}     `json:"bizStateRecords"`
 }
 
 // InstallBizRequest is the request for installing biz module to ark container.
