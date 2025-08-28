@@ -6,6 +6,7 @@ toolchain go1.21.3
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
+	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.4.0
 	github.com/magiconair/properties v1.8.5
 	github.com/manifoldco/promptui v0.9.0
@@ -15,6 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/net v0.23.0
+	golang.org/x/text v0.14.0
 )
 
 require (
@@ -44,7 +46,6 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
