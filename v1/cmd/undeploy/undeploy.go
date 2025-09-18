@@ -32,6 +32,7 @@ var (
 	hostFlag          string = "127.0.0.1"
 	portFlag          int
 	bizNameAndVersion string // in the format of bizName:bizVersion
+	bizModelVersionFlag   string // biz model version, used to identify the biz model in the pod
 )
 
 var (
@@ -78,6 +79,7 @@ func execUnInstallLocal(ctx *contextutil.Context) error {
 		BizModel: ark.BizModel{
 			BizName:    strings.Split(bizNameAndVersion, ":")[0],
 			BizVersion: strings.Split(bizNameAndVersion, ":")[1],
+			BizModelVersion: bizModelVersionFlag,
 		},
 	}); err != nil {
 		pterm.Error.Printfln("uninstall %s failed: %s", bizNameAndVersion, err)
@@ -130,6 +132,7 @@ func execUnInstallLocalWithPrompt(ctx *contextutil.Context) error {
 
 func init() {
 	UnDeployCmd.Flags().IntVar(&portFlag, "port", 1238, "the port of ark container")
+	UnDeployCmd.Flags().StringVar(&bizModelVersionFlag, "biz-model-version", "", "the biz model version of ark container")
 
 	root.RootCmd.AddCommand(UnDeployCmd)
 }

@@ -107,6 +107,9 @@ type BizModel struct {
 
 	// BizUrl is the location of source code.
 	BizUrl fileutil.FileUrl `json:"bizUrl,omitempty"`
+
+	// BizModelVersion is the version of this model.
+	BizModelVersion string `json:"bizModelVersion,omitempty"`
 }
 
 type BizInfo struct {

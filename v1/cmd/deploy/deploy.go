@@ -41,6 +41,8 @@ import (
 )
 
 var (
+	bizModelVersionFlag string
+
 	portFlag int
 
 	subBundlePath string
@@ -80,7 +82,10 @@ Scenario 2: Deploy a local pre-built bundle to local running ark container:
 Scenario 3: Build and deploy a bundle at current dir to a remote running ark container in k8s cluster with default port:
 	arkctl deploy --pod ${namespace}/${name}
 
-Scenario 4: Build an maven multi module project and deploy a sub module to a running ark container:
+Scenario 4: Build and deploy a bundle at current dir to a remote running ark container in k8s cluster with biz model version witch is pod key from kubernetes:
+	arkctl deploy --pod ${namespace}/${name} --biz-model-version ${your-biz-model-version}
+
+Scenario 5: Build an maven multi module project and deploy a sub module to a running ark container:
 	arkctl deploy --sub ${path/to/your/sub/module}
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -183,6 +188,9 @@ func execParseBizModel(ctx *contextutil.Context) bool {
 		pterm.Error.PrintOnError(fmt.Errorf("failed to parse bundle: %s", err))
 		return false
 	}
+	if bizModelVersionFlag != "" {
+		bizModel.BizModelVersion = bizModelVersionFlag
+	}
 
 	ctx.Put(ctxKeyBizModel, bizModel)
 	style.InfoPrefix("BizBundleInfo").Println(string(runtime.MustReturnResult(json.Marshal(*bizModel))))
@@ -252,6 +260,7 @@ func execInstallInKubePod(ctx *contextutil.Context) bool {
 		string(runtime.MustReturnResult(json.Marshal(ark.BizModel{
 			BizName:    bizModel.BizName,
 			BizVersion: bizModel.BizVersion,
+			BizModelVersion: bizModel.BizModelVersion,
 		}))),
 		fmt.Sprintf("http://127.0.0.1:%v/uninstallBiz", portFlag),
 	)
@@ -301,6 +310,7 @@ func execInstallInKubePod(ctx *contextutil.Context) bool {
 			BizName:    bizModel.BizName,
 			BizVersion: bizModel.BizVersion,
 			BizUrl:     fileutil.FileUrl(osutil.GetLocalFileProtocol() + ctx.Value(ctxKeyArkBizBundlePathInSidePod).(string)),
+			BizModelVersion: bizModel.BizModelVersion,
 		}))),
 		fmt.Sprintf("http://127.0.0.1:%v/installBiz", portFlag),
 	)
@@ -456,6 +466,9 @@ If Provided, arkctl will try to build the project at current dir and deploy the 
 
 	DeployCommand.Flags().IntVar(&portFlag, "port", 1238, `
 The default port of ark container is 1238 if not provided.
+`)
+	DeployCommand.Flags().StringVar(&bizModelVersionFlag, "biz-model-version", "", `
+If provided, arkctl will use this biz model version to deploy the biz module.
 `)
 
 }
